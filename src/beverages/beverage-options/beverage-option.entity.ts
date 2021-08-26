@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, Column } from 'typeorm';
+import { Entity, ManyToOne, Column, JoinColumn } from 'typeorm';
 
 import { ManagedEntity } from '../../managed-entities/managed-entities/managed-entity';
 import { Beverage } from '../beverages/beverage.entity';
@@ -15,5 +15,9 @@ export class BeverageOption extends ManagedEntity {
     type => Beverage,
     beverage => beverage.beverageOptions,
   )
+  @JoinColumn({ referencedColumnName: 'id', name: 'beverageId' })
   beverage: Beverage;
+
+  @Column()
+  beverageId: number;
 }

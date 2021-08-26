@@ -39,6 +39,8 @@ export class BeveragesService {
     options: IPaginationOptions,
   ): Promise<Pagination<Beverage>> {
     const beverages = this.beverageRepository.createQueryBuilder('beverages');
+    beverages.leftJoinAndSelect('beverages.beverageOptions', 'beverageOptions');
+
     if (query.search) {
       beverages.andWhere(' beverages.name like :search', {
         search: `%${query.search}%`,
@@ -64,6 +66,9 @@ export class BeveragesService {
   }
 
   async deleteOne(id: number) {
-    return this.beverageRepository.softDelete(id);
+    const beverage = await this.beverageRepository.findOneOrFail(id, {
+      relations: ['beverageOptions'],
+    });
+    return this.beverageRepository.softRemove(beverage);
   }
 }
