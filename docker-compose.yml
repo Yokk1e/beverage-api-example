@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  mariadb:
+    image: 'bitnami/mariadb:10.5'
+    container_name: 'mariadb'
+    expose:
+      - '3306'
+    ports:
+      - '3306:3306'
+    networks:
+      - backend-network
+    environment:
+      - MARIADB_DATABASE=beverage_db
+      - MARIADB_ROOT_PASSWORD=1234
+    user: root
+  phpmyadmin:
+    image: 'bitnami/phpmyadmin:5.1.0-debian-10-r46'
+    container_name: 'phpmyadmin'
+    ports:
+      - '8081:8080'
+    user: root
+  backend:
+    depends_on:
+      - mariadb
+    build: .
+    networks:
+      - backend-network
+    restart: 'on-failure'
+    ports:
+      - '3000:3000'
+    environment:
+      - NEST_PORT=3000
+      - NEST_TYPEORM_HOST=mariadb
+      - NEST_TYPEORM_PORT=3306
+      - NEST_TYPEORM_USERNAME=root
+      - NEST_TYPEORM_PASSWORD=1234
+      - NEST_TYPEORM_DATABASE=beverage_db
+      - NEST_TYPEORM_TIMEZONE=UTC
+      - NEST_TYPEORM_SYNCHRONIZE=TRUE
+      - NEST_TYPEORM_LOGGING=TRUE
+      - API_DOCUMENT_ENABLE=TRUE
+    command: bash -c "yarn seed:reset && node dist/main.js"
+
+networks:
+  backend-network:
+    driver: bridge
